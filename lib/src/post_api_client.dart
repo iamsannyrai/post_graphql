@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:graphql/client.dart';
+import 'package:post_graphql/src/models/paginated_post.dart';
 
 const posts = r'''
 query PostWithPagination($limit: Int!,$page:Int!){
@@ -33,15 +33,11 @@ class PostApiClient {
 
   final GraphQLClient _graphQLClient;
 
-  void getPosts() async {
-    try {
-      final queryOptions = QueryOptions(
-          document: gql(posts), variables: const {"limit": 10, "page": 1});
-      debugPrint("gql: ${gql(posts)}");
-      final result = await _graphQLClient.query(queryOptions);
-      debugPrint("result: ${result.data?["posts"]}");
-    } catch (e) {
-      debugPrint(e.toString());
-    }
+  Future<PaginatedPost> getPosts() async {
+    final queryOptions = QueryOptions(
+        document: gql(posts), variables: const {"limit": 10, "page": 1});
+    final result = await _graphQLClient.query(queryOptions);
+    final paginatedPost =  PaginatedPost.fromJson(result.data?["posts"]);
+    return paginatedPost;
   }
 }

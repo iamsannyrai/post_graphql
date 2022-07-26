@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:post_graphql/src/cubit/post_cubit.dart';
+import 'package:post_graphql/src/cubit/post_state.dart';
 import 'package:post_graphql/src/post_api_client.dart';
 
 void main() {
@@ -30,11 +33,13 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  void _incrementCounter() {
-    postApiClient.getPosts();
-  }
+  late PostApiClient postApiClient;
 
-  final postApiClient = PostApiClient.create();
+  @override
+  void initState() {
+    super.initState();
+    postApiClient = PostApiClient.create();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,20 +47,24 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: const <Widget>[
-            Text(
-              'You have pushed the button this many times:',
-            ),
-          ],
+      body: BlocProvider<PostCubit>(
+        create: (context) =>
+            PostCubit(postApiClient: postApiClient)..getPosts(),
+        child: BlocBuilder<PostCubit, PostState>(
+          builder: (context, state) => Container(
+            child: state.loading
+                ? const Center(child: CircularProgressIndicator())
+                : ListView.builder(
+                    itemCount: state.paginatedPost!.data.length,
+                    itemBuilder: (context, index) => ListTile(
+                      title: Text(
+                        state.paginatedPost!.data[index].title,
+                      ),
+                      subtitle: Text(state.paginatedPost!.data[index].body),
+                    ),
+                  ),
+          ),
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
       ),
     );
   }

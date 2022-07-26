@@ -37,6 +37,8 @@ dependencies:
   graphql: ^5.1.1
   freezed_annotation: ^2.1.0
   json_annotation: ^4.6.0
+  equatable: ^2.0.3
+  flutter_bloc: ^8.0.1
 
 dev_dependencies:
   flutter_test:
